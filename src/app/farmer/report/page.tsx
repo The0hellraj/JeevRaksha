@@ -142,7 +142,7 @@ export default function ReportPage() {
           <p className="text-xs text-gray-500">{user?.name || "Loading..."}</p>
         </div>
         <div className="flex gap-4 items-center">
-          <Link href="/farmer/my-issues" className="text-sm font-bold text-gray-600 hover:text-violet-700 hidden sm:block">My Issues</Link>
+          <Link href="/farmer/my-issues" className="text-sm font-bold text-gray-600 hover:text-violet-700">My Issues</Link>
           <Link href="/farmer/chat" className="text-sm font-bold text-violet-700 hover:text-violet-900 bg-violet-100 px-3 py-1.5 rounded-full flex items-center gap-1 transition">
             <Mic className="w-4 h-4" /> Ask AI
           </Link>

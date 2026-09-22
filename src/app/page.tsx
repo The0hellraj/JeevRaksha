@@ -1,5 +1,6 @@
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
   Activity,
   AlertTriangle,
   ArrowRight,
@@ -25,6 +26,15 @@ import {
 } from "lucide-react";
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("jeevraksha_user");
+    if (stored) {
+      setUser(JSON.parse(stored));
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 overflow-x-hidden">
 
@@ -54,15 +64,24 @@ export default function Home() {
 
         {/* Auth buttons */}
         <div className="flex items-center gap-2">
-          <Link href="/login" className="hidden md:inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-4 py-2">
-            Sign In
-          </Link>
-          <Link href="/register" className="hidden sm:inline-flex items-center text-sm font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors px-4 py-2 rounded-lg border border-violet-100">
-            Create Account
-          </Link>
+          {!user ? (
+            <>
+              <Link href="/login" className="hidden md:inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-4 py-2">
+                Sign In
+              </Link>
+              <Link href="/register" className="hidden sm:inline-flex items-center text-sm font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors px-4 py-2 rounded-lg border border-violet-100">
+                Create Account
+              </Link>
+            </>
+          ) : (
+            <Link href="/dashboard" className="inline-flex text-sm font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors px-3 py-2 rounded-lg border border-violet-100">
+              Dashboard
+            </Link>
+          )}
           <Link href="/farmer/report" className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 transition-colors px-4 py-2 rounded-lg shadow-md shadow-violet-200">
             <PlusCircle className="w-4 h-4" />
-            Report Issue
+            <span className="hidden sm:inline">Report Issue</span>
+            <span className="inline sm:hidden">Report</span>
           </Link>
         </div>
       </nav>
