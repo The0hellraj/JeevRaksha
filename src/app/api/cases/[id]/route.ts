@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { status, riskLevel } = await req.json();
-    const caseId = params.id;
+    const resolvedParams = await params;
+    const caseId = resolvedParams.id;
 
     if (!caseId) {
       return NextResponse.json({ error: 'Case ID is required' }, { status: 400 });
