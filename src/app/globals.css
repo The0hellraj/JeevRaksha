@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* Force light-mode only — no dark mode switching */
+:root {
+  --background: #f5f4fb;
+  --foreground: #111827;
+}
+
+
+/* Always force light theme */
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f5f4fb;
+  color: #111827;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* All form inputs always light */
+input,
+select,
+textarea {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Custom scroll bar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #c4b5fd;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
