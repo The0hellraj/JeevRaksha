@@ -14,10 +14,15 @@ export const metadata: Metadata = {
     "AI-powered animal health surveillance connecting farmers, veterinarians, laboratories and government teams across rural India.",
 };
 
+import ChatFAB from "@/components/ChatFAB";
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={inter.variable} style={{ colorScheme: "light" }}>
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        {children}
+        <ChatFAB />
+      </body>
     </html>
   );
 }

@@ -52,15 +52,59 @@ export async function POST(req: Request) {
       },
     });
 
-    // Run risk engine
-    const riskResult = calculateRisk({
-      severity: severity || 'MILD',
-      nearbyCases,
-      mortality: deaths || 0,
-      vaccinationGap: false, // default for now
-      historicalTrendScore: Math.min(nearbyCases, 10),
-      environmentalContextScore: 0,
-    });
+    // Run risk engine (Sarvam AI or Nill rating for dead)
+    let riskResult = {
+      riskLevel: "LOW",
+      riskScore: 0,
+      factors: ["System Default"],
+      recommendedAction: "Monitor closely.",
+    };
+
+    if (deaths && parseInt(deaths) > 0) {
+      riskResult = {
+        riskLevel: "HIGH",
+        riskScore: 0,
+        factors: ["Mortality Reported"],
+        recommendedAction: "Isolate carcass immediately and contact authorities for disposal and testing.",
+      };
+    } else {
+      try {
+        const prompt = `Analyze this livestock health report. Symptoms: ${(symptoms || []).join(", ")}. Severity: ${severity}. Affected: ${animalsAffected}. Location: ${locationVillage}. Nearby cases last 30 days: ${nearbyCases}. 
+Return ONLY a valid JSON object without any markdown tags or backticks. Required fields: "riskLevel" (String: LOW, MEDIUM, or HIGH), "riskScore" (Number: 0 to 100), and "recommendedAction" (String: short actionable advice).`;
+        
+        const aiRes = await fetch("https://api.sarvam.ai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "api-subscription-key": process.env.SARVAM_API_KEY || "",
+          },
+          body: JSON.stringify({
+            model: "sarvam-105b-conversations",
+            messages: [{ role: "system", content: "You are a veterinary AI. Always respond in valid JSON only." }, { role: "user", content: prompt }],
+            temperature: 0.1,
+          }),
+        });
+        
+        if (aiRes.ok) {
+          const aiData = await aiRes.json();
+          let rawOutput = aiData.choices[0].message.content.trim();
+          if (rawOutput.startsWith("\`\`\`json")) rawOutput = rawOutput.slice(7, -3).trim();
+          else if (rawOutput.startsWith("\`\`\`")) rawOutput = rawOutput.slice(3, -3).trim();
+          
+          const parsed = JSON.parse(rawOutput);
+          riskResult = {
+            riskLevel: parsed.riskLevel || "MEDIUM",
+            riskScore: parsed.riskScore || 50,
+            factors: ["Sarvam AI", ...(symptoms || [])],
+            recommendedAction: parsed.recommendedAction || "Consult a vet.",
+          };
+        } else {
+          console.error("Sarvam AI non-ok response", await aiRes.text());
+        }
+      } catch (e) {
+        console.error("Sarvam AI Error:", e);
+      }
+    }
 
     // Create report + symptoms in a transaction
     const report = await prisma.$transaction(async (tx: any) => {

@@ -132,30 +132,6 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Social proof */}
-            <div className="flex items-center gap-4">
-              <div className="flex -space-x-2.5">
-                {[
-                  "photo-1633332755192-727a05c4013d",
-                  "photo-1494790108377-be9c29b29330",
-                  "photo-1607990281513-2c110a25bd8c",
-                ].map((id) => (
-                  <img
-                    key={id}
-                    src={`https://images.unsplash.com/${id}?w=40&h=40&fit=crop&crop=face`}
-                    className="w-8 h-8 rounded-full border-2 border-violet-700 object-cover"
-                    alt="User"
-                  />
-                ))}
-                <div className="w-8 h-8 rounded-full border-2 border-violet-700 bg-violet-500 flex items-center justify-center text-[10px] font-bold text-white">+8k</div>
-              </div>
-              <div>
-                <div className="flex items-center gap-0.5 mb-0.5">
-                  {[1,2,3,4,5].map(s => <Star key={s} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}
-                </div>
-                <p className="text-white/60 text-xs">Trusted by 8,000+ farmers & vets</p>
-              </div>
-            </div>
           </div>
 
           {/* Right — floating dashboard card */}
@@ -202,18 +178,6 @@ export default function Home() {
           <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 60L1440 60L1440 20C1200 60 960 0 720 20C480 40 240 0 0 20L0 60Z" fill="white" />
           </svg>
-        </div>
-      </section>
-
-      {/* ── TRUSTED BY ── */}
-      <section className="py-10 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 md:px-20">
-          <p className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-8">Trusted & referenced by leading institutions</p>
-          <div className="flex flex-wrap items-center justify-center gap-10">
-            {["ICAR", "IVRI", "NDDB", "Animal Husbandry Dept.", "NHM"].map((name) => (
-              <span key={name} className="text-sm font-bold text-gray-300 tracking-widest uppercase">{name}</span>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -346,85 +310,6 @@ export default function Home() {
                 <div>
                   <p className="text-xs text-gray-400 font-medium">Avg. Response Time</p>
                   <p className="font-extrabold text-gray-900 text-lg leading-none">4.2 hrs</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── TEAM ── */}
-      <section id="team" className="py-24 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6 md:px-20">
-          <div className="text-center max-w-xl mx-auto mb-14">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-violet-600 mb-4">Our Experts</span>
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-3 leading-tight">Meet our veterinary leadership</h2>
-            <p className="text-gray-400 text-sm">Seasoned professionals leading India's most advanced livestock health network</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {[
-              { name: "Dr. Priya Sharma", role: "Chief Veterinarian", img: "photo-1559839734-2b71ea197ec2" },
-              { name: "Dr. Amit Patel", role: "Epidemiologist", img: "photo-1612349317150-e413f6a5b16d" },
-              { name: "Dr. Sunita Rao", role: "Lab Specialist", img: "photo-1651008376811-b90baee60c1f" },
-              { name: "Dr. Rajesh Kumar", role: "Field Coordinator", img: "photo-1582750433449-648ed127bb54" },
-            ].map(({ name, role, img }, i) => (
-              <div key={name} className="group rounded-2xl overflow-hidden bg-white border border-gray-100 hover:border-violet-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-                <div className="overflow-hidden">
-                  <img
-                    src={`https://images.unsplash.com/${img}?w=300&h=300&fit=crop&crop=face`}
-                    alt={name}
-                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4">
-                  <p className="font-bold text-gray-800 text-sm">{name}</p>
-                  <p className="text-violet-600 text-xs font-medium mt-0.5">{role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIAL ── */}
-      <section className="py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-6 md:px-20">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <span className="inline-block text-xs font-bold uppercase tracking-widest text-violet-600 mb-6">Testimonial</span>
-              <div className="flex items-center gap-1 mb-5">
-                {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
-              </div>
-              <blockquote className="text-2xl font-bold text-gray-800 leading-relaxed mb-8">
-                "JeevRaksha helped us detect an FMD outbreak in our village 3 days earlier than usual. We saved 40+ animals from a preventable disease."
-              </blockquote>
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1607346256330-dee7af15f7c5?w=60&h=60&fit=crop&crop=face"
-                  className="w-11 h-11 rounded-full object-cover border-2 border-gray-100"
-                  alt="Ramesh Kumar"
-                />
-                <div>
-                  <p className="font-bold text-gray-800 text-sm">Ramesh Kumar</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Dairy Farmer, Varanasi (UP)</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=700&q=85&fit=crop"
-                alt="Happy livestock farmer"
-                className="rounded-2xl shadow-xl w-full h-80 object-cover border border-gray-100"
-              />
-              <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-lg border border-gray-100 p-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-violet-600" />
-                </div>
-                <div>
-                  <p className="font-extrabold text-gray-900 text-xl leading-none">40%</p>
-                  <p className="text-xs text-gray-400 mt-0.5 font-medium">Faster outbreak response</p>
                 </div>
               </div>
             </div>
