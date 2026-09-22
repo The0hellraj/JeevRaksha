@@ -55,7 +55,6 @@ export default function Home() {
             { label: "Services", href: "#services" },
             { label: "How It Works", href: "#how" },
             { label: "Our Team", href: "#team" },
-            { label: "Dashboard", href: "/dashboard" },
           ].map(({ label, href }) => (
             <a key={label} href={href} className="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-gray-50">
               {label}

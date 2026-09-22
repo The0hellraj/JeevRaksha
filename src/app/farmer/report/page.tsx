@@ -18,14 +18,21 @@ export default function ReportPage() {
   const [submittedReport, setSubmittedReport] = useState<any>(null);
   const [error, setError] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [isListeningSymptoms, setIsListeningSymptoms] = useState(false);
+  const [aiSymptomText, setAiSymptomText] = useState("");
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const [drafting, setDrafting] = useState(false);
+  const [draftText, setDraftText] = useState("");
+  const [isListeningDraft, setIsListeningDraft] = useState(false);
 
   const [form, setForm] = useState({
     animalId: "",
     symptoms: [] as string[],
     severity: "MILD",
-    deaths: 0,
-    animalsAffected: 1,
-    vaccinatedCount: 0,
+    deaths: 0 as number | "",
+    animalsAffected: 1 as number | "",
+    vaccinatedCount: 0 as number | "",
     temperature: "",
     duration: "",
     locationVillage: "",
@@ -72,6 +79,97 @@ export default function ReportPage() {
     recognition.onerror = (e: any) => { console.error(e); setIsListening(false); };
     recognition.onend = () => setIsListening(false);
     recognition.start();
+  };
+
+  const startListeningSymptoms = () => {
+    const SpeechRecognition = typeof window !== 'undefined' ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null;
+    if (!SpeechRecognition) return alert("Speech recognition is not supported in this browser.");
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN';
+    recognition.continuous = false;
+    
+    recognition.onstart = () => setIsListeningSymptoms(true);
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript;
+      setAiSymptomText(prev => prev ? prev + " " + transcript : transcript);
+    };
+    recognition.onerror = (e: any) => { console.error(e); setIsListeningSymptoms(false); };
+    recognition.onend = () => setIsListeningSymptoms(false);
+    recognition.start();
+  };
+
+  const analyzeSymptoms = async () => {
+    if (!aiSymptomText.trim()) return;
+    setAnalyzing(true);
+    try {
+      const res = await fetch("/api/map-symptoms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: aiSymptomText, predefinedSymptoms: SYMPTOMS })
+      });
+      const data = await res.json();
+      if (data.matched && data.matched.length > 0) {
+        setForm(f => {
+          const newSymptoms = new Set([...f.symptoms, ...data.matched]);
+          return { ...f, symptoms: Array.from(newSymptoms) };
+        });
+        setAiSymptomText("");
+      } else {
+        alert("Could not automatically map symptoms. Please try again or select manually.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error reaching AI service.");
+    }
+    setAnalyzing(false);
+  };
+
+  const startListeningDraft = () => {
+    const SpeechRecognition = typeof window !== 'undefined' ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null;
+    if (!SpeechRecognition) return alert("Speech recognition is not supported in this browser.");
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN';
+    recognition.continuous = false;
+    
+    recognition.onstart = () => setIsListeningDraft(true);
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript;
+      setDraftText(prev => prev ? prev + " " + transcript : transcript);
+    };
+    recognition.onerror = (e: any) => { console.error(e); setIsListeningDraft(false); };
+    recognition.onend = () => setIsListeningDraft(false);
+    recognition.start();
+  };
+
+  const autoDraftReport = async () => {
+    if (!draftText.trim()) return;
+    setDrafting(true);
+    try {
+      const res = await fetch("/api/draft-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: draftText, predefinedSymptoms: SYMPTOMS })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setForm(f => ({
+          ...f,
+          symptoms: data.symptoms || f.symptoms,
+          severity: data.severity || f.severity,
+          animalsAffected: data.animalsAffected !== undefined ? data.animalsAffected : f.animalsAffected,
+          deaths: data.deaths !== undefined ? data.deaths : f.deaths,
+          locationVillage: data.locationVillage || f.locationVillage,
+          additionalNotes: data.additionalNotes || f.additionalNotes,
+        }));
+        alert("Form auto-filled successfully! Please review the details.");
+      } else {
+        alert("Failed to draft report.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error reaching AI service.");
+    }
+    setDrafting(false);
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -151,6 +249,37 @@ export default function ReportPage() {
       </header>
 
       <main className="max-w-2xl mx-auto p-4 md:p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          <div className="bg-gradient-to-br from-violet-100 to-purple-50 px-6 py-5 border-b border-violet-200">
+            <h2 className="text-lg font-extrabold text-violet-800 flex items-center gap-2">
+              <span className="text-xl">✨</span> AI Issue Reporter
+            </h2>
+            <p className="text-violet-600 text-sm mt-1">Speak or type your entire issue, and AI will draft the report for you! (अपनी समस्या बोलें, AI फॉर्म भर देगा)</p>
+          </div>
+          <div className="p-6">
+            <div className="flex gap-2">
+              <button type="button" onClick={startListeningDraft} className={`p-3 rounded-lg flex-shrink-0 transition flex items-center justify-center ${isListeningDraft ? 'bg-red-100 text-red-600 animate-pulse border border-red-200' : 'bg-white border border-gray-300 text-gray-500 hover:text-violet-700 hover:bg-violet-50 hover:border-violet-300'}`} title="Speak">
+                {isListeningDraft ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+              </button>
+              <textarea 
+                value={draftText} 
+                onChange={e => setDraftText(e.target.value)} 
+                placeholder="Example: Meri 3 gaay bimar hai, ek mar gayi hai. Unhe bukhar aur khansi hai. Main Rampur gaon se hu." 
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-violet-500 resize-none" 
+                rows={2}
+              />
+            </div>
+            <button 
+              type="button" 
+              onClick={autoDraftReport} 
+              disabled={drafting || !draftText.trim()} 
+              className="mt-3 w-full bg-violet-600 text-white px-4 py-3 rounded-lg font-bold disabled:opacity-50 hover:bg-violet-700 transition"
+            >
+              {drafting ? "Drafting Report..." : "Auto-Fill Form"}
+            </button>
+          </div>
+        </div>
+
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-br from-violet-700 to-purple-600 px-6 py-5 text-white">
             <h2 className="text-xl font-bold">Report Animal Health Issue</h2>
@@ -190,6 +319,18 @@ export default function ReportPage() {
             {/* Symptoms */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Symptoms (लक्षण) *</label>
+
+              {/* AI Auto-Match Input */}
+              <div className="flex gap-2 mb-4 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                <button type="button" onClick={startListeningSymptoms} className={`p-2 rounded-md transition flex-shrink-0 ${isListeningSymptoms ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-violet-100 text-violet-700 hover:bg-violet-200'}`} title="Speak symptoms">
+                  {isListeningSymptoms ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
+                <input type="text" value={aiSymptomText} onChange={e => setAiSymptomText(e.target.value)} placeholder="Type or speak symptoms to auto-match..." className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-violet-500" />
+                <button type="button" onClick={analyzeSymptoms} disabled={analyzing || !aiSymptomText.trim()} className="bg-violet-600 text-white px-3 sm:px-4 py-2 rounded-md text-sm font-bold disabled:opacity-50 hover:bg-violet-700 transition flex-shrink-0">
+                  {analyzing ? "Analyzing..." : "Auto Match"}
+                </button>
+              </div>
+
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {SYMPTOMS.map((sym) => (
                   <label key={sym} className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition ${form.symptoms.includes(sym) ? "bg-violet-50 border-violet-500" : "border-gray-200 hover:bg-gray-50"}`}>
@@ -228,20 +369,29 @@ export default function ReportPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Animals Affected *</label>
-                <input type="number" min="1" value={form.animalsAffected}
-                  onChange={(e) => setForm((f) => ({ ...f, animalsAffected: parseInt(e.target.value) || 1 }))}
+                <input type="number" min="0" value={form.animalsAffected}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((f) => ({ ...f, animalsAffected: val === "" ? "" : parseInt(val) }));
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-violet-500 outline-none" required />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Deaths</label>
                 <input type="number" min="0" value={form.deaths}
-                  onChange={(e) => setForm((f) => ({ ...f, deaths: parseInt(e.target.value) || 0 }))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((f) => ({ ...f, deaths: val === "" ? "" : parseInt(val) }));
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-violet-500 outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Vaccinated Animals</label>
                 <input type="number" min="0" value={form.vaccinatedCount}
-                  onChange={(e) => setForm((f) => ({ ...f, vaccinatedCount: parseInt(e.target.value) || 0 }))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((f) => ({ ...f, vaccinatedCount: val === "" ? "" : parseInt(val) }));
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-violet-500 outline-none" />
               </div>
             </div>

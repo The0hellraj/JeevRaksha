@@ -95,12 +95,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-          <Link
-            href="/login"
+          <button
+            onClick={() => {
+              localStorage.removeItem("jeevraksha_user");
+              window.location.href = "/";
+            }}
             className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
           >
             Sign Out
-          </Link>
+          </button>
         </div>
       </aside>
 
